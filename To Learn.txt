@@ -1,4 +1,0 @@
-Promise
-Async
-react roucter 
-tailwind

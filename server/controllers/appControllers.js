@@ -5,74 +5,74 @@ import jwt from "jsonwebtoken";
 // Middleware for verify user.
 export async function verifyUser(req, res, next) {
     try {
-        const {username}= req.method == "GET" ? req.query : req.body;
+        const { username } = req.method == "GET" ? req.query : req.body;
 
         //check the user existence.
-        let exist = await UserModel.findOne({username});
-        if(!exist) return res.status(404).send({error: "Can't find User!"});
+        let exist = await UserModel.findOne({ username });
+        if (!exist) return res.status(404).send({ error: "Can't find User!" });
         next();
 
     } catch (error) {
-return res.status(404).send({error: "Authentication Error"});
+        return res.status(404).send({ error: "Authentication Error" });
     }
 }
 
 export async function Register(req, res) {
 
-    try {
-        const { username, password, profile, email } = req.body;
+try {
+    const { username, password, profile, email } = req.body;
 
-        //check for existing user
-        const existUsername = new Promise((resolve, reject) => {
-            UserModel.findOne({ username }, function (err, user) {
-                if (err) reject(new Error(err))
-                if (user) reject({ error: "Username already exists" });
+    //check for existing user
+    const existUsername = new Promise((resolve, reject) => {
+        UserModel.findOne({ username }, function (err, user) {
+            if (err) reject(new Error(err))
+            if (user) reject({ error: "Username already exists" });
 
-                resolve();
-            })
-        });
-
-        //check for existing email
-        const existEmail = new Promise((resolve, reject) => {
-            UserModel.findOne({ email }, function (err, email) {
-                if (err) reject(new Error(err))
-                if (email) reject({ error: "Email already exists" });
-
-                resolve();
-            })
-        });
-
-        Promise.all([existUsername, existEmail]).then(() => {
-            if (password) {
-                bcrypt.hash(password, 10).then(hashedPassword => {
-
-                    const user = new UserModel({
-                        username,
-                        password: hashedPassword,
-                        profile: profile || "",
-                        email
-                    });
-
-                    // return save result as a response.
-                    user.save()
-                        .then(result => res.status(201).send({ msg: "User registered successfully." }))
-                        .catch(error => res.status(500).send({ error }))
-
-
-                }).catch(error => {
-                    return res.status(500).send({
-                        error: "Enable to hashed password."
-                    })
-                })
-
-            }
-        }).catch(error => {
-            return res.status(500).send({ error })
+            resolve();
         })
+    });
 
-    } catch (error) {
-        return res.status(500).send(error);
-    }
+    //check for existing email
+    const existEmail = new Promise((resolve, reject) => {
+        UserModel.findOne({ email }, function (err, email) {
+            if (err) reject(new Error(err))
+            if (email) reject({ error: "Email already exists" });
+
+            resolve();
+        })
+    });
+
+    Promise.all([existUsername, existEmail]).then(() => {
+        if (password) {
+            bcrypt.hash(password, 10).then(hashedPassword => {
+
+                const user = new UserModel({
+                    username,
+                    password: hashedPassword,
+                    profile: profile || "",
+                    email
+                });
+
+                // return save result as a response.
+                user.save()
+                    .then(result => res.status(201).send({ msg: "User registered successfully." }))
+                    .catch(error => res.status(500).send({ error }))
+
+
+            }).catch(error => {
+                return res.status(500).send({
+                    error: "Enable to hashed password."
+                })
+            })
+
+        }
+    }).catch(error => {
+        return res.status(500).send({ error })
+    })
+
+} catch (error) {
+    return res.status(500).send(error);
+}
 }
 
 export async function Login(req, res) {
@@ -114,12 +114,37 @@ export async function Login(req, res) {
 }
 
 export async function getUser(req, res) {
-    res.json("getUser route");
+    const { username } = req.body.param;
+
+    try {
+        if (!username) return res.status(501).send({ error: "Invalid Username" });
+
+        UserModel.findOne({ username }, function (err, user) {
+            if (err) return res.status(500).send({ err });
+            if (!user) return res.status(501).send({ error: "Couldnot find the user" });
+
+            const { password, ...rest } = Object.assign({}, user.toJSON());
+            return res.status(201).send(rest);
+        })
+    } catch (error) {
+        return res.status(404).send({ error: "Couldnot find User data." });
+    }
 }
 
 
 export async function UpdateUser(req, res) {
-    res.json("UpdateUser route");
+    try {
+        const id = req.query.id;
+
+        //update the data
+        UserModel.updateOne({_id: id}, body, function(err, data){
+            if(err) throw err;
+        })
+        
+    } catch (error) {
+        return res.status(401).send({error});
+        
+    }
 }
 
 export async function GenerateOTP(req, res) {

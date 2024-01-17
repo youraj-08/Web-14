@@ -7,7 +7,7 @@ import * as controller from "../controllers/appControllers.js"
 router.route("/Register").post(controller.Register); //Register Route.
 // router.route("/RegisterMail").post();
 router.route("/Authenticate").post((req, res)=>res.end());
-router.route("/Login").post(controller.Login);
+router.route("/Login").post(controller.verifyUser, controller.Login);
 
 
 

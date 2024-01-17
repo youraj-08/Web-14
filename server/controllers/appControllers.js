@@ -1,5 +1,21 @@
 import UserModel from "../model/User.model.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
+// Middleware for verify user.
+export async function verifyUser(req, res, next) {
+    try {
+        const {username}= req.method == "GET" ? req.query : req.body;
+
+        //check the user existence.
+        let exist = await UserModel.findOne({username});
+        if(!exist) return res.status(404).send({error: "Can't find User!"});
+        next();
+
+    } catch (error) {
+return res.status(404).send({error: "Authentication Error"});
+    }
+}
 
 export async function Register(req, res) {
 
@@ -26,14 +42,32 @@ export async function Register(req, res) {
             })
         });
 
-        Promise.all([existUsername, existEmail]).then(()=>{
-            if(password){
+        Promise.all([existUsername, existEmail]).then(() => {
+            if (password) {
+                bcrypt.hash(password, 10).then(hashedPassword => {
+
+                    const user = new UserModel({
+                        username,
+                        password: hashedPassword,
+                        profile: profile || "",
+                        email
+                    });
+
+                    // return save result as a response.
+                    user.save()
+                        .then(result => res.status(201).send({ msg: "User registered successfully." }))
+                        .catch(error => res.status(500).send({ error }))
+
+
+                }).catch(error => {
+                    return res.status(500).send({
+                        error: "Enable to hashed password."
+                    })
+                })
 
             }
         }).catch(error => {
-            return res.status(500).send({
-                error: "Enable to hashed password."
-            })
+            return res.status(500).send({ error })
         })
 
     } catch (error) {
@@ -42,7 +76,41 @@ export async function Register(req, res) {
 }
 
 export async function Login(req, res) {
-    res.json("Login route");
+    const { username, password } = req.body;
+
+    try {
+        UserModel.findOne({ username })
+            .then(user => {
+
+                bcrypt.compare(password, user.password)
+                    .then(passwordCheck => {
+                        if (!passwordCheck) return res.status(400).send({ error: "Dont have a password" })
+
+                        // create jwt token
+                        jwt.sign({
+                            userId: user.id,
+                            username: user.username,
+                        }, process.env.SECRET, { expireIn: "24h" });
+
+                        return res.status(200).send({
+                            msg: "Login Successful..!",
+                            username: user.username,
+                            token
+                        })
+
+
+                    })
+                    .catch(error => {
+                        return res.status(400).send({ errror: "Password doesnot match." });
+                    })
+            })
+            .catch(error => {
+                return res.status(404).send({ errror: "Username not found" });
+            })
+    } catch (error) {
+        return res.status(500).send({ errror });
+
+    }
 }
 
 export async function getUser(req, res) {

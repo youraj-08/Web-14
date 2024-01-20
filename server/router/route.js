@@ -8,10 +8,8 @@ import { registerMail } from "../controllers/mailer.js";
 //POST Methods.
 router.route("/Register").post(controller.Register); //Register Route.
 router.route("/RegisterMail").post(registerMail);
-router.route("/Authenticate").post((req, res) => res.end());
+router.route("/Authenticate").post(controller.verifyUser, (req, res) => res.end());
 router.route("/Login").post(controller.verifyUser, controller.Login);
-
-
 
 
 //GET Methods.
@@ -19,8 +17,6 @@ router.route("/User/:Username").get(controller.getUser);
 router.route("/GenerateOTP").get(controller.verifyUser, localVariables, controller.GenerateOTP);
 router.route("/VerifyOTP").get(controller.VerifyOTP);
 router.route("/CreateResetSession").get(controller.CreateResetSession);
-
-
 
 
 //PUT Methods.

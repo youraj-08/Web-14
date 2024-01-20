@@ -1,4 +1,4 @@
-import { jwt } from "jsonwebtoken";
+import  jwt  from "jsonwebtoken";
 
 //Auth middleware.
 export default async function Auth(req, res, next) {

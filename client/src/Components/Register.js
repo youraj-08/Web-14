@@ -1,16 +1,18 @@
 import React, { useState } from 'react'
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import avatar from "../Asstes/profile.png"
-import { Toaster } from "react-hot-toast"
+import toast, { Toaster } from "react-hot-toast"
 import { useFormik } from "formik"
 import { registerValidation } from '../Helper/validate'
 import convertToBase64 from '../Helper/convert'
+import { registerUser } from '../Helper/helper'
 
 import styles from "../Styles/Username.module.css"
 
 export default function Register() {
 
-const [file, setFile] = useState()
+  const navigate = useNavigate()
+  const [file, setFile] = useState()
 
   const formik = useFormik({
     initialValues: {
@@ -22,18 +24,25 @@ const [file, setFile] = useState()
     validateOnBlur: false,
     validateOnChange: false,
     onSubmit: async values => {
-      values = await Object.assign(values, {profile: file || ''})
-      console.log(values);
+      values = await Object.assign(values, { profile: file || '' })
+      let registerPromise = registerUser(values);
+      toast.promise(registerPromise, {
+        loading: "Creating...",
+        success: <b>Registered Successfully...</b>,
+        error: <b>Could not Register.</b>
+      });
+
+      registerPromise.then(function(){navigate("/")});
     }
   })
 
 
-// formik doesnot support file upload so we need to create this file handler.
-const onUpload = async e =>{
-  const base64 = await convertToBase64(e.target.files[0]);
-  setFile(base64);
+  // formik doesnot support file upload so we need to create this file handler.
+  const onUpload = async e => {
+    const base64 = await convertToBase64(e.target.files[0]);
+    setFile(base64);
 
-}
+  }
 
 
   return (
@@ -42,7 +51,7 @@ const onUpload = async e =>{
       <Toaster position='top-center' reverseOrder={false}></Toaster>
 
       <div className='flex justify-center items-center h-screen'>
-        <div className={styles.glass} style={{width:"45%"}}>
+        <div className={styles.glass} style={{ width: "45%" }}>
 
           <div className='title flex flex-col items-center'>
             <h4 className='text-5xl font-bold'> Register!</h4>

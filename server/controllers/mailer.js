@@ -1,52 +1,58 @@
-import nodemailer from "nodemailer";
-import mailgen from "mailgen";
-import Mailgen from "mailgen";
+import nodemailer from 'nodemailer';
+import Mailgen from 'mailgen';
 
+import 'dotenv/config';
+
+
+// https://ethereal.email/create
 let nodeConfig = {
-    host: "smtp.forwardemail.net",
-    port: 465,
-    secure: true,
+    host: "smtp.ethereal.email",
+    port: 587,
+    secure: false, // true for 465, false for other ports
     auth: {
-        // TODO: replace `user` and `pass` values from <https://forwardemail.net>
-        user: process.env.EMAIL,
-        pass: process.env.PASSWORD,
-    },
+        user: process.env.EMAIL, // generated ethereal user
+        pass: process.env.PASSWORD, // generated ethereal password
+    }
 }
 
 let transporter = nodemailer.createTransport(nodeConfig);
 
-let mailGenerator = new Mailgen({
+let MailGenerator = new Mailgen({
     theme: "default",
-    product: {
+    product : {
         name: "Mailgen",
-        link: "https://mailgen.js/"
+        link: 'https://mailgen.js/'
     }
 })
+
+// POST: http://localhost:8080/api/registerMail 
 
 export const registerMail = async (req, res) => {
     const { username, userEmail, text, subject } = req.body;
 
-    //body of the email
+    // body of the email
     var email = {
-        name: username,
-        intro: text || "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-        outro: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+        body : {
+            name: username,
+            intro : text || 'Thank-You for joinning us! We\'re very excited to have you on board.',
+            outro: 'For any queries, reply to this email. We\'d love to help.'
+        }
     }
 
-
-    var emailBody = mailGenerator.generate(email);
+    var emailBody = MailGenerator.generate(email);
 
     let message = {
-        from: process.env.EMAIL,
+        from : process.env.EMAIL,
         to: userEmail,
-        subject: subject || "Lorem Ipsum  dolor.",
-        html: emailBody
+        subject : subject || "Signup Successful",
+        html : emailBody
     }
 
-    //Send mail.
+    // send mail
     transporter.sendMail(message)
         .then(() => {
-            return res.status(200).send({ msg: "Email sent." })
+            return res.status(200).send({ msg: "You should receive an email from us."})
         })
         .catch(error => res.status(500).send({ error }))
+
 }

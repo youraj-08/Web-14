@@ -6,9 +6,8 @@ import 'dotenv/config';
 
 // https://ethereal.email/create
 let nodeConfig = {
-    host: "smtp.ethereal.email",
-    port: 587,
-    secure: false, // true for 465, false for other ports
+    host: "smtp.gmail.com",
+    secure: true, // true for 465, false for other ports
     auth: {
         user: process.env.EMAIL, // generated ethereal user
         pass: process.env.PASSWORD, // generated ethereal password

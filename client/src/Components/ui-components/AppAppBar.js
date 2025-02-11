@@ -13,7 +13,9 @@ import MenuIcon from '@mui/icons-material/Menu';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import ColorModeIconDropdown from '../shared-theme/ColorModeIconDropdown';
 import { useNavigate } from 'react-router-dom';
-import Sitemark from './SitemarkIcon';
+import Harmonica from './Aurora';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import Tooltip from '@mui/material/Tooltip';
 
 
 
@@ -42,6 +44,7 @@ export default function AppAppBar() {
   };
 
 
+
   return (
     <AppBar
       position="fixed"
@@ -56,13 +59,11 @@ export default function AppAppBar() {
       <Container maxWidth="lg">
         <StyledToolbar variant="dense" disableGutters>
           <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', px: 0 }}>
-            <Sitemark />
-            <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
 
-              <Button variant="text" color="info" size="small" sx={{ minWidth: 0 }}
-                onClick={() => { navigate("/home"); }}>
-                Home
-              </Button>
+            <Button onClick={() => { navigate("/home"); }}>
+              <Harmonica /></Button>
+
+            <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
               <Button variant="text" color="info" size="small"
                 onClick={() => { navigate("/features"); }}>
                 Features
@@ -93,13 +94,16 @@ export default function AppAppBar() {
               alignItems: 'center',
             }}
           >
-            <Button color="primary" variant="text" size="small">
-              Sign in
-            </Button>
-            <Button color="primary" variant="contained" size="small">
-              Sign up
-            </Button>
+
+            <Tooltip title="Profile Settings" arrow>
+              <IconButton
+                onClick={() => { navigate("/profile"); }}>
+                <AccountCircleIcon />
+              </IconButton>
+            </Tooltip>
+
             <ColorModeIconDropdown />
+
           </Box>
           <Box sx={{ display: { xs: 'flex', md: 'none' }, gap: 1 }}>
             <ColorModeIconDropdown size="medium" />
@@ -123,9 +127,11 @@ export default function AppAppBar() {
                     justifyContent: 'flex-end',
                   }}
                 >
-                  <IconButton onClick={toggleDrawer(false)}>
-                    <CloseRoundedIcon />
-                  </IconButton>
+                  
+                    <IconButton onClick={toggleDrawer(false)}>
+                      <CloseRoundedIcon />
+                    </IconButton>
+                  
                 </Box>
 
                 <MenuItem>Features</MenuItem>
@@ -133,16 +139,13 @@ export default function AppAppBar() {
                 <MenuItem>Highlights</MenuItem>
                 <MenuItem>Pricing</MenuItem>
                 <MenuItem>FAQ</MenuItem>
-                <MenuItem>Blog</MenuItem>
+
                 <Divider sx={{ my: 3 }} />
+
                 <MenuItem>
-                  <Button color="primary" variant="contained" fullWidth>
-                    Sign up
-                  </Button>
-                </MenuItem>
-                <MenuItem>
-                  <Button color="primary" variant="outlined" fullWidth>
-                    Sign in
+                  <Button variant="outlined" startIcon={<AccountCircleIcon />}
+                    onClick={() => { navigate("/profile"); }}>
+                    Profile Settings
                   </Button>
                 </MenuItem>
               </Box>
